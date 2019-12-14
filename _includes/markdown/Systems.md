@@ -378,7 +378,7 @@ For most applications, 10up uses Round Robin as it satisfies the goals of load b
 
 In most scenarios, 10up recommends against enabling session persistence on the load balancer.  Session persistence, or sticky sessions, will attempt to identify each user and route the user to the same backend server for all their requests.  Users can be identified by their IP address or using a cookie.  Reasons to do this include:
 
-* An application that uses PHP sessions (a better solution is to use memcached or Redis store sessions in a shared pool)
+* An application that uses PHP sessions (see section about PHP Sessions below)
 * Webservers that may not be identical (it would be better for the servers to be identical instead)
 * Storage for uploaded files has a replication lag (see "Shared Storage" section for further discussion)
 
@@ -390,6 +390,10 @@ Downsides of using persistent sessions:
 * Upstream caching can be ineffective when using a cookie to uniquely identify each visitor.
 
 Since WordPress uses cookies to track logged-in state, requests can safely be balanced across multiple servers even for logged-in users.  For best results in a load balanced environment, find solutions that don't require persistent sessions and load balance requests across all servers without uniquely identifying a user. 
+
+### PHP Sessions
+
+WordPress does not use PHP sessions, but some plugins do.  By default, PHP sessions are stored on the local file-system of the webserver, which would cause the website visitor to lose their session as their requests get balanced across multiple webservers.  A simple solution is to have PHP store sessions in memcached or Redis, which are often already available for caching purposes.  Memcached and Redis are a resource shared across all webservers and the PHP extensions for memcached and Redis have built in support for PHP session storage.
 
 ### Shared Storage
 
@@ -413,7 +417,7 @@ Using a cloud object storage system is 10up's preferred solution, but does come 
 
 ### Software and Services
 
-Load balancing has become a comodity service, avaiable at the click of a button on every cloud hosting platform.  The load balancing services offered by the major cloud providers, such as Amazon Web Services, Microsoft Azure, and Google Cloud, are quite good and recommended.
+Load balancing has become a comodity service, avaiable at the click of a button on every cloud hosting platform.  The load balancing services offered by the major cloud providers, such as Amazon Web Services, Microsoft Azure, and Google Cloud, are quite good and 10up recommends their use.  Be advised, however, that each platform has multiple types of load balancers and the documentation should be consulted to make sure the type chosen matches up with the type of load balancing needed. 
 
 If building a multiserver environment outside of the cloud providers, the following software load balancers are a good place to start:
 
@@ -421,4 +425,4 @@ If building a multiserver environment outside of the cloud providers, the follow
 * [HAProxy](http://www.haproxy.org/) - focused load balancer software with powerful options
 * [LVS](http://www.linuxvirtualserver.org/whatis.html) - Simple load balancing with very little overhead 
 
-As 10up uses Nginx as our main webserver software, we also prefer to use it as our load balancing solution as it makes it easier to become an expert in one piece of software rather than learning many.  
+As 10up uses Nginx as our main webserver software, we also prefer to use it as our load balancing solution for the sake of simplicity.   
